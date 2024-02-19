@@ -19,6 +19,8 @@
 
 package net.william278.papiproxybridge;
 
+import com.github.Anon8281.universalScheduler.UniversalScheduler;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.google.common.collect.Lists;
 import net.william278.papiproxybridge.api.PlaceholderAPI;
 import net.william278.papiproxybridge.papi.Formatter;
@@ -43,6 +45,7 @@ import java.util.logging.Level;
 public class BukkitPAPIProxyBridge extends JavaPlugin implements PAPIProxyBridge, PluginMessageListener, Listener {
     private Formatter formatter;
     private final List<BukkitUser> users = Lists.newCopyOnWriteArrayList();
+    private static TaskScheduler scheduler;
 
     @Override
     public void onLoad() {
@@ -52,6 +55,8 @@ public class BukkitPAPIProxyBridge extends JavaPlugin implements PAPIProxyBridge
 
     @Override
     public void onEnable() {
+        scheduler = UniversalScheduler.getScheduler(this);
+
         // Register the plugin message channel
         getServer().getMessenger().registerOutgoingPluginChannel(this, getChannel());
         getServer().getMessenger().registerOutgoingPluginChannel(this, getComponentChannel());
@@ -78,6 +83,10 @@ public class BukkitPAPIProxyBridge extends JavaPlugin implements PAPIProxyBridge
         // Unregister the plugin message channel
         getServer().getMessenger().unregisterOutgoingPluginChannel(this);
         getServer().getMessenger().unregisterIncomingPluginChannel(this);
+    }
+
+    public static TaskScheduler getScheduler() {
+        return scheduler;
     }
 
     private void loadOnlinePlayers() {
@@ -128,7 +137,7 @@ public class BukkitPAPIProxyBridge extends JavaPlugin implements PAPIProxyBridge
     @NotNull
     public final CompletableFuture<String> formatPlaceholders(@NotNull UUID formatFor, @NotNull BukkitUser requester, @NotNull String text) {
         final CompletableFuture<String> future = new CompletableFuture<>();
-        getServer().getScheduler().runTaskLater(this,
+        getScheduler().runTaskLater(this,
                 () -> future.complete(formatter.formatPlaceholders(formatFor, requester.getPlayer(), text)),
                 requester.justSwitchedServer() ? 2 : 1);
         return future;
@@ -139,7 +148,7 @@ public class BukkitPAPIProxyBridge extends JavaPlugin implements PAPIProxyBridge
         final BukkitUser user = BukkitUser.adapt(event.getPlayer());
         user.setJustSwitchedServer(true);
         users.add(user);
-        getServer().getScheduler().runTaskLater(this,
+        getScheduler().runTaskLater(this,
                 () -> user.setJustSwitchedServer(false),
                 10);
     }

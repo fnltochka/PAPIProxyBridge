@@ -45,6 +45,7 @@ allprojects {
     dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
         testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+        implementation 'com.github.Anon8281:UniversalScheduler:0.1.6'
     }
 
     test {
@@ -128,6 +129,7 @@ subprojects {
 
     if (['bukkit', 'bungee', 'velocity', 'plugin'].contains(project.name)) {
         shadowJar {
+            relocate 'com.github.Anon8281.universalScheduler', 'net.william278.papiproxybridge.universalScheduler'
             destinationDirectory.set(file("$rootDir/target"))
             archiveClassifier.set('')
         }
